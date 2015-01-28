@@ -18,6 +18,7 @@
     "content_scripts":[
         {
             "matches":["file://*/*g"],
+            "css":["css/mark.css"],
             "js":["js/mark.js"]
         }
     ]
