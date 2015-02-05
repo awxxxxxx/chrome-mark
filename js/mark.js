@@ -19,6 +19,8 @@ var mark = {
     w:null,
     /*图片高*/
     h:null,
+    /*是否点击按钮*/
+    isClicked:false,
     /**
      *@synopsis 创建button按钮
      *@param bId 按钮的id
@@ -43,6 +45,9 @@ var mark = {
         this.canvas.width = this.w;
         this.canvas.height = this.h;
         this.ctx.drawImage(this.currentImg,0,0);
+        if(this.isClicked) {
+            this.active.drawAll();
+        }
     },
 
     /**
@@ -69,6 +74,7 @@ var mark = {
             mark.drawImage();
         }
         this.currentImg.src = img.src;
+        mark.active.init();
     },
 
     /**
@@ -104,22 +110,33 @@ var mark = {
 
 
     /*
-     *@synopsis 绑定事件
+     *@synopsis 按钮的事件绑定
      */
     bindEvent:function() {
+        this.doc.getElementById('main').onclick = function() {
+            mark.isClicked = true;
+        };
         this.doc.getElementById('wMeasure').onclick = function() {
-                mark.canvas.addEventListener('mousemove',function(event) {
-                    mark.canvasX = mark.canvas.offsetLeft;
-                    mark.canvasY = mark.canvas.offsetTop;
-                    if(event.offsetX === undefined) {
-                        event.offsetX = event.pageX - mark.canvasX;
-                        event.offsetY = event.pageY - mark.canvasY;
-                    }
-                    var mouseX = event.offsetX,
-                        mouseY = event.offsetY;
-                        console.log(mark.canvasX);
-                });
+            mark.iswMeasure = true;
+            mark.ishMeasure = false;
+            mark.isGetColor = false;
+        };
+        this.doc.getElementById('hMeasure').onclick = function() {
+            mark.ishMeasure = true;
+            mark.iswMeasure = false;
+            mark.isGetColor = false;
+        };
+        this.doc.getElementById('getColor').onclick = function() {
+            mark.isGetColor = true;
+            mark.iswMeasure = false;
+            mark.ishMeasure = false;
         }
+        this.doc.getElementById('Mouse').onclick = function(e) {
+            mark.isClicked = false;
+            mark.drawImage();
+            e.stopPropagation(e);
+        }
+        //TODO save操作
     },
 
     /**
@@ -141,22 +158,89 @@ mark.active = {
     canvas:null,
     canvasX:null,
     canvasY:null,
+    ny:null,
+    /*当前鼠标的坐标*/
+    currentMP:null,
+    /*所有已测量的宽度数据*/
+    measuredWidth:[],
+    /*所有已测量的高度数据*/
+    measuredHeight:[],
+    /*所有已测量的颜色数据*/
+    measuredColor:[],
     /**
-     *@绘制宽度标尺
+     *@synopsis 绘制所有样式
      */
-    drawAll:function(event) {
+    drawAll:function() {
+        if(mark.iswMeasure) {
+            this.drawWidthRuler();
+        }
+        if(mark.ishMeasure) {
+            this.drawHeightRuler();
+        }
+    },
+    /**
+     *@synopsis 绘制宽度标尺
+     */
+    drawWidthRuler:function() {
         var context = this.ctx;
         context.strokeStyle = '#e74c3c';
-        context.lineWidth = 2;
+        context.lineWidth = 1;
         context.lineCap = 'square';
         context.beginPath();
-        context.moveTo(this.canvasX + event.offsetX,this.canvasY + event.offsetY);
-        var targetX = event.offsetX > 20 ? 20:event.offsetX;
-        context.lineTo(this.canvasX + event.offsetX - targetX,this.canvasY + event.offsetY);
+        context.moveTo(this.currentMP.x,this.currentMP.y);
+        var targetX = this.currentMP.x > 20 ? 20:this.currentMP.x;
+        context.lineTo(this.currentMP.x - targetX,this.currentMP.y);
         context.stroke();
         context.closePath();
-        this.drawImage();
     },
+    /**
+     *@synopsis 绘制高度标尺
+     */
+    drawHeightRuler:function() {
+        var context = this.ctx;
+        context.strokeStyle = '#e74c3c';
+        context.lineWidth = 1;
+        context.lineCap = 'square';
+        context.beginPath();
+        context.moveTo(this.currentMP.x,this.currentMP.y);
+        var targetY = this.currentMP.y > 20 ? 20:this.currentMP.y;
+        context.lineTo(this.currentMP.x,this.currentMP.y - targetY);
+        context.stroke();
+        context.closePath();
+    },
+    /**
+     *@synopsis canvas层的事件绑定
+     */
+    bindEvent:function() {
+        this.canvas.addEventListener('mousemove',function(event) {
+                var active = mark.active;
+                console.log(mark.isClicked);
+                if(!mark.isClicked) {
+                    return;
+                }
+                active.canvasX = active.canvas.offsetLeft;
+                active.canvasY = active.canvas.offsetTop;
+                if(event.offsetX === undefined) {
+                    event.offsetX = event.pageX - active.canvasX;
+                    event.offsetY = event.pageY - active.canvasY;
+                }
+                var mouseX = event.offsetX,
+                    mouseY = event.offsetY;
+                active.currentMP.x = mouseX;
+                active.currentMP.y = mouseY;
+                console.log(active.currentMP);
+                mark.drawImage();
+        });
+    },
+    /**
+     *@synopsis 初始化函数
+     */
+    init:function() {
+        this.ctx = mark.ctx;
+        this.canvas = mark.canvas;
+        this.currentMP = {x:null,y:null};
+        this.bindEvent();
+    }
 };
 mark.init();
 
