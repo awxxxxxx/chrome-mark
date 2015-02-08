@@ -42,14 +42,21 @@ var mark = {
      *
      */
     drawImage:function() {
-        this.canvas.width = this.w;
-        this.canvas.height = this.h;
-        this.ctx.drawImage(this.currentImg,0,0);
+        this.canvas.width = this.w + 10;
+        this.canvas.height = this.h +10;
+        this.ctx.drawImage(this.currentImg,5,5,this.w,this.h);
         if(this.isClicked) {
             this.active.drawAll();
         }
     },
-
+    /**
+     *@synopsis 下载图片
+     */
+    downLoadImg:function() {
+        var dataURL = this.canvas.toDataURL('image/jpeg');
+        dataURL = dataURL.replace("image/jpeg", "image/octet-stream");
+        window.location.href = dataURL;
+    },
     /**
      *@synopsis 向DOM中插入Canvas,同时在canvas中绘制刚刚加载的图片
      */
@@ -61,8 +68,8 @@ var mark = {
         newCanvas.setAttribute('id','canvas');
         imgWidth = img.offsetWidth;
         imgHeight = img.offsetHeight;
-        newCanvas.setAttribute('width',imgWidth);
-        newCanvas.setAttribute('height',imgHeight);
+        newCanvas.setAttribute('width',imgWidth+10);
+        newCanvas.setAttribute('height',imgHeight+10);
         this.w = imgWidth;
         this.h = imgHeight;
         img.remove();
@@ -136,7 +143,10 @@ var mark = {
             mark.drawImage();
             e.stopPropagation(e);
         }
-        //TODO save操作
+        this.doc.getElementById('save').onclick = function() {
+            mark.isClicked = false;
+            mark.downLoadImg();
+        }
     },
 
     /**
@@ -183,13 +193,23 @@ mark.active = {
      */
     drawWidthRuler:function() {
         var context = this.ctx;
-        context.strokeStyle = '#e74c3c';
+        context.strokeStyle = 'red';
         context.lineWidth = 1;
-        context.lineCap = 'square';
+       // context.lineCap = 'square';
         context.beginPath();
-        context.moveTo(this.currentMP.x,this.currentMP.y);
+        //画宽度线
+        context.moveTo(this.currentMP.x - 5,this.currentMP.y);
         var targetX = this.currentMP.x > 20 ? 20:this.currentMP.x;
-        context.lineTo(this.currentMP.x - targetX,this.currentMP.y);
+        context.lineTo(this.currentMP.x - targetX -5,this.currentMP.y);
+        //绘制左边基准线
+        context.moveTo(this.currentMP.x - targetX - 6,this.currentMP.y - 5);
+        context.lineTo(this.currentMP.x - targetX - 6,this.currentMP.y + 5);
+        //绘制右边基准线
+        context.moveTo(this.currentMP.x - 4,this.currentMP.y - 5);
+        context.lineTo(this.currentMP.x - 4,this.currentMP.y + 5);
+        //绘制数字
+        context.font = '10px Arial';
+        context.fillText('20',this.currentMP.x - 20,this.currentMP.y + 5);
         context.stroke();
         context.closePath();
     },
@@ -198,13 +218,22 @@ mark.active = {
      */
     drawHeightRuler:function() {
         var context = this.ctx;
-        context.strokeStyle = '#e74c3c';
+        context.strokeStyle = 'red';
         context.lineWidth = 1;
-        context.lineCap = 'square';
+        //context.lineCap = 'square';
         context.beginPath();
-        context.moveTo(this.currentMP.x,this.currentMP.y);
+        context.moveTo(this.currentMP.x,this.currentMP.y -5);
         var targetY = this.currentMP.y > 20 ? 20:this.currentMP.y;
-        context.lineTo(this.currentMP.x,this.currentMP.y - targetY);
+        context.lineTo(this.currentMP.x,this.currentMP.y - targetY - 5);
+        //绘制顶部基准线
+        context.moveTo(this.currentMP.x - 5,this.currentMP.y - targetY - 6);
+        context.lineTo(this.currentMP.x + 5,this.currentMP.y - targetY - 6);
+        //绘制底边基准线
+        context.moveTo(this.currentMP.x - 5,this.currentMP.y - 4);
+        context.lineTo(this.currentMP.x + 5,this.currentMP.y - 4);
+        //绘制数字
+        context.font = '10px Arial';
+        context.fillText('20',this.currentMP.x,this.currentMP.y - 10);
         context.stroke();
         context.closePath();
     },
