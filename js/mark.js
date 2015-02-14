@@ -42,9 +42,9 @@ var mark = {
      *
      */
     drawImage:function() {
-        this.canvas.width = this.w + 10;
-        this.canvas.height = this.h +10;
-        this.ctx.drawImage(this.currentImg,5,5,this.w,this.h);
+        this.canvas.width = this.w + 20;
+        this.canvas.height = this.h + 20;
+        this.ctx.drawImage(this.currentImg,10,10,this.w,this.h);
         if(this.isClicked) {
             this.active.drawAll();
         }
@@ -68,8 +68,8 @@ var mark = {
         newCanvas.setAttribute('id','canvas');
         imgWidth = img.offsetWidth;
         imgHeight = img.offsetHeight;
-        newCanvas.setAttribute('width',imgWidth+10);
-        newCanvas.setAttribute('height',imgHeight+10);
+        newCanvas.setAttribute('width',imgWidth+20);
+        newCanvas.setAttribute('height',imgHeight+20);
         this.w = imgWidth;
         this.h = imgHeight;
         img.remove();
@@ -216,6 +216,21 @@ mark.active = {
      *@synopsis 绘制所有样式
      */
     drawAll:function() {
+        if(this.measuredWidth.length > 0) {
+            for(var i in this.measuredWidth) {
+                this.drawWidth(this.measuredWidth[i]);
+            }
+        }
+        if(this.measuredHeight.length > 0) {
+            for(var i in this.measuredHeight) {
+                this.drawHeight(this.measuredHeight[i]);
+            }
+        }
+        if(this.measuredColor.length > 0) {
+            for(var i in this.measuredColor) {
+                this.drawPicker(this.measuredColor[i]);
+            }
+        }
         if(mark.iswMeasure) {
             if(this.isMouseDown) {
                 console.log(this.isMouseDown);
@@ -232,10 +247,21 @@ mark.active = {
             this.drawWidthRuler();
         }
         if(mark.ishMeasure) {
+            if(this.isMouseDown) {
+                var point = {},
+                    targetY;
+                targetY = this.mousedownMP.y > 20 ? 20:this.mousedownMP.y;
+                point.startX = this.mousedownMP.x - 10;
+                point.startY = this.mousedownMP.y - 10 -targetY;
+                point.endX = this.currentMP.x - 10;
+                point.endY = this.currentMP.y - 10;
+                this.drawHeight(point);
+                return;
+            }
             this.drawHeightRuler();
         }
         if(mark.isGetColor) {
-            this.drawPicker();
+            this.drawPicker(this.currentMP);
         }
     },
     /**
@@ -259,7 +285,7 @@ mark.active = {
         context.lineTo(this.currentMP.x - 9,this.currentMP.y);
         //绘制数字
         context.font = '10px Arial';
-        context.fillText('20',this.currentMP.x - 25,this.currentMP.y + 5);
+        context.fillText('20',this.currentMP.x - 25,this.currentMP.y - 5);
         context.stroke();
         context.closePath();
         //绘制锚点
@@ -298,36 +324,36 @@ mark.active = {
     /**
      *@synopsis 绘制取色器
      */
-    drawPicker:function() {
+    drawPicker:function(point) {
         var context = this.ctx,
-            color = this.pickColor();
+            color = this.pickColor(point);
         /*绘制鼠标点*/
         context.strokeStyle = 'red';
-        context.strokeRect(this.currentMP.x - 4,this.currentMP.y - 4,4,4);
+        context.strokeRect(point.x - 4,point.y - 4,4,4);
         /*绘制颜色值*/
         context.beginPath();
         context.strokeStyle = 'red';
         context.lineWidth = 1;
-        context.moveTo(this.currentMP.x + 10,this.currentMP.y - 2);
-        context.lineTo(this.currentMP.x,this.currentMP.y - 2);
+        context.moveTo(point.x + 10,point.y - 2);
+        context.lineTo(point.x,point.y - 2);
         context.stroke();
         context.closePath();
         /*绘制颜色框*/
         context.fillStyle = '#' + color.rgbHex;
-        context.fillRect(this.currentMP.x + 10,this.currentMP.y - 6,12,12);
+        context.fillRect(point.x + 10,point.y - 6,12,12);
         context.strokeStyle = 'red';
-        context.strokeRect(this.currentMP.x + 10,this.currentMP.y -6,12,12);
+        context.strokeRect(point.x + 10,point.y -6,12,12);
         /*绘制进制值*/
         context.font = '10px Arial';
         context.fillStyle = 'red';
-        context.fillText('#'+color.rgbHex,this.currentMP.x + 24,this.currentMP.y);
+        context.fillText('#'+color.rgbHex,point.x + 24,point.y);
     },
 
     /**
      *@synopsis 获取颜色
      */
-    pickColor:function() {
-        var canvasIndex = (this.currentMP.x + this.currentMP.y * this.canvas.width) * 4,
+    pickColor:function(point) {
+        var canvasIndex = (point.x + point.y * this.canvas.width) * 4,
             active = mark.active,
             color = {
                 r:active.imageData[canvasIndex],
@@ -362,27 +388,30 @@ mark.active = {
      *@param point 坐标对象包含起始坐标和结束坐标
      */
     drawWidth:function(point) {
-        var context = this.ctx;
+        var context = this.ctx,
+            width = point.endX - point.startX,
+            strWidth = Math.abs(width).toString();
         context.strokeStyle = 'red';
         context.lineWidth = 1;
         //context.lineCap = 'square';
         context.beginPath();
+        //绘制宽度
         context.moveTo(point.startX,point.startY);
-        context.lineTo(point.endX,point.endY);
-        //绘制顶部基准线
-        context.moveTo(this.currentMP.x - 15,this.currentMP.y - targetY - 11);
-        context.lineTo(this.currentMP.x - 5,this.currentMP.y - targetY - 11);
-        //绘制底边基准线
-        context.moveTo(this.currentMP.x - 15,this.currentMP.y - 9);
-        context.lineTo(this.currentMP.x - 5,this.currentMP.y - 9);
+        context.lineTo(point.endX,point.startY);
+        //绘制左边基准线
+        context.moveTo(point.startX - 1,point.startY - 5);
+        context.lineTo(point.startX - 1,point.startY + 5);
+        //绘制右边基准线
+        context.moveTo(point.endX + 1,point.startY - 5);
+        context.lineTo(point.endX + 1,point.startY + 5);
         //绘制数字
         context.font = '10px Arial';
-        context.fillText('20',this.currentMP.x - 10,this.currentMP.y - 15);
+        context.fillText(strWidth,point.startX + width / 2,point.startY);
         context.stroke();
         context.closePath();
         //绘制锚点
         context.strokeStyle = 'red';
-        context.strokeRect(this.currentMP.x - 12,this.currentMP.y,5,5)
+        context.strokeRect(point.endX + 8,point.startY - 2,5,5)
     },
 
     /**
@@ -390,7 +419,30 @@ mark.active = {
      *@param point 坐标对象包含起始坐标和结束坐标
      */
     drawHeight:function(point) {
-
+        var context = this.ctx,
+            height = point.endY - point.startY,
+            strHeight = Math.abs(height).toString();
+        context.strokeStyle = 'red';
+        context.lineWidth = 1;
+        //context.lineCap = 'square';
+        context.beginPath();
+        //绘制高度线
+        context.moveTo(point.startX,point.startY);
+        context.lineTo(point.startX,point.endY);
+        //绘制顶部基准线
+        context.moveTo(point.startX - 5,point.startY - 1);
+        context.lineTo(point.startX + 5,point.startY - 1);
+        //绘制底边基准线
+        context.moveTo(point.startX - 5,point.endY + 1);
+        context.lineTo(point.startX + 5,point.endY + 1);
+        //绘制数字
+        context.font = '10px Arial';
+        context.fillText(strHeight,point.startX,point.startY + height/2);
+        context.stroke();
+        context.closePath();
+        //绘制锚点
+        context.strokeStyle = 'red';
+        context.strokeRect(point.startX - 2,point.endY + 10,5,5)
     },
 
     /**
@@ -427,19 +479,71 @@ mark.active = {
                 return;
             }
             active.isMouseDown = true;
-            if(mark.iswMeasure) {
-                active.canvasX = active.canvas.offsetLeft;
-                active.canvasY = active.canvas.offsetTop;
-                if(event.offsetX === undefined) {
-                    event.offsetX = event.pageX - active.canvasX;
-                    event.offsetY = event.pageY - active.canvasY;
-                }
-                var mouseX = event.offsetX,
-                    mouseY = event.offsetY;
+            active.canvasX = active.canvas.offsetLeft;
+            active.canvasY = active.canvas.offsetTop;
+            if(event.offsetX === undefined) {
+                event.offsetX = event.pageX - active.canvasX;
+                event.offsetY = event.pageY - active.canvasY;
+            }
+            var mouseX = event.offsetX,
+                mouseY = event.offsetY;
+            if(mark.iswMeasure || mark.ishMeasure) {
                 active.mousedownMP.x = mouseX;
                 active.mousedownMP.y = mouseY;
-                //mark.drawImage();
             }
+            if(mark.isGetColor) {
+                active.measuredColor.push({
+                    x:mouseX - 1,
+                    y:mouseY - 1
+                });
+            }
+        });
+        this.canvas.addEventListener('mouseup',function() {
+            var active = mark.active;
+            if(!mark.isClicked) {
+                return;
+            }
+            active.isMouseDown = false;
+            active.canvasX = active.canvas.offsetLeft;
+            active.canvasY = active.canvas.offsetTop;
+            if(event.offsetX === undefined) {
+                event.offsetX = event.pageX - active.canvasX;
+                event.offsetY = event.pageY - active.canvasY;
+            }
+            var mouseX = event.offsetX,
+                mouseY = event.offsetY;
+            active.mouseupMP.x = mouseX;
+            active.mouseupMP.y = mouseY;
+            var targetX,targetY,
+                fromX,fromY,
+                toX,toY;
+            if(mark.iswMeasure) {
+                targetX = active.mousedownMP.x > 20 ? 20:active.mousedownMP.x;
+                fromX = active.mousedownMP.x - 10 - targetX;
+                fromY = active.mousedownMP.y - 5;
+                toX = active.mouseupMP.x - 10;
+                toY = active.mouseupMP.y - 5;
+                active.measuredWidth.push({
+                    startX:fromX,
+                    startY:fromY,
+                    endX:toX,
+                    endY:toY
+                });
+            }
+            if(mark.ishMeasure) {
+                targetY = active.mousedownMP.y > 20 ? 20:active.mousedownMP.y;
+                fromX = active.mousedownMP.x - 10;
+                fromY = active.mousedownMP.y - 10 - targetY;
+                toX = active.mouseupMP.x - 10;
+                toY = active.mouseupMP.y - 10;
+                active.measuredHeight.push({
+                    startX:fromX,
+                    startY:fromY,
+                    endX:toX,
+                    endY:toY
+                });
+            }
+            mark.drawImage();
         });
     },
 
@@ -451,6 +555,7 @@ mark.active = {
         this.canvas = mark.canvas;
         this.currentMP = {x:null,y:null};
         this.mousedownMP = {x:null,y:null};
+        this.mouseupMP = {x:null,y:null};
         this.bindEvent();
     }
 };
