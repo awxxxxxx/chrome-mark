@@ -1,0 +1,27 @@
+{
+  "name": "chrome-mark",
+  "version": "0.1.0",
+  "description": "deal with picture",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dsxbb/chrome-mark.git"
+  },
+  "keywords": [
+    "measure"
+  ],
+  "author": "waterbear",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dsxbb/chrome-mark/issues"
+  },
+  "homepage": "https://github.com/dsxbb/chrome-mark#readme",
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-connect": "^2.2.0",
+    "gulp-sass": "^2.0.4"
+  }
+}

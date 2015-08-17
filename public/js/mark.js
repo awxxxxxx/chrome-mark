@@ -65,9 +65,12 @@ var mark = {
             img = this.doc.getElementsByTagName('img')[0],
             imgWidth,
             imgHeight;
+        console.log(img.src);
         newCanvas.setAttribute('id','canvas');
-        imgWidth = img.offsetWidth;
-        imgHeight = img.offsetHeight;
+        imgWidth = img.width;
+        imgHeight = img.height;
+        console.log(imgWidth);
+        console.log(imgHeight);
         newCanvas.setAttribute('width',imgWidth+20);
         newCanvas.setAttribute('height',imgHeight+20);
         this.w = imgWidth;
@@ -80,6 +83,7 @@ var mark = {
         this.currentImg.onload = function() {
             mark.drawImage();
             mark.active.imageData = mark.ctx.getImageData(0,0,mark.canvas.width,mark.canvas.height).data;
+            console.log(this.width);
         }
         this.currentImg.src = img.src;
         mark.active.init();
@@ -469,8 +473,8 @@ mark.active = {
                 }
                 var mouseX = event.offsetX,
                     mouseY = event.offsetY;
-                active.currentMP.x = mouseX;
-                active.currentMP.y = mouseY;
+                active.currentMP.x = mouseX - 0.5;
+                active.currentMP.y = mouseY - 0.5;
                 mark.drawImage();
         });
         this.canvas.addEventListener('mousedown',function(event) {
