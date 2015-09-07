@@ -19,6 +19,8 @@ var mark = {
     w:null,
     /*图片高*/
     h:null,
+    /* 缩放比 */
+    ratio: 1,
     /*是否点击按钮*/
     isClicked:false,
     /**
@@ -45,6 +47,9 @@ var mark = {
         this.canvas.width = this.w + 20;
         this.canvas.height = this.h + 20;
         this.ctx.drawImage(this.currentImg,10,10,this.w,this.h);
+        if(!this.active.imageData) {
+            this.active.imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height).data;
+        }
         if(this.isClicked) {
             this.active.drawAll();
         }
@@ -90,6 +95,10 @@ var mark = {
         //    }
         //}
         this.currentImg.onload = function() {
+            mark.ratio = this.height / imgHeight;
+            mark.w = this.width;
+            mark.h = this.height;
+            console.log(mark.ratio);
             mark.drawImage();
             mark.w = this.width;
             mark.h = this.height;
@@ -170,6 +179,9 @@ var mark = {
     init:function() {
         this.doc = document;
         this.currentImg = new Image();
+
+        //详见http://developer.mozilla.org/en-US/docs/Web/HTML/CORS_enabled_image
+        //this.currentImg.crossOrigin = 'anonymous';
         this.insertCanvas();
         this.insertPanel();
         this.bindEvent();
