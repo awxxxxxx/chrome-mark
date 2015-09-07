@@ -8,6 +8,9 @@
         "48":"images/48.png",
         "128":"images/128.png"
     },
+    "permissions":[
+        "file://*"
+    ],
     "browser_action":{
         "default_icon":{
             "19":"images/19.png",

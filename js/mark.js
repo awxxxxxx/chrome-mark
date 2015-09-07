@@ -77,8 +77,22 @@ var mark = {
         this.doc.body.appendChild(newCanvas);
         this.canvas = this.doc.getElementById('canvas');
         this.ctx = this.canvas.getContext('2d');
+        //var reader = new FileReader();
+        //reader.readAsDataURL(img.src);
+        //reader.onload = function(e) {
+        //    var urlData = e.target.result;
+        //    mark.currentImg.src = urlData;
+        //    mark.currentImg.onload = function() {
+        //        mark.drawImage();
+        //        mark.w = this.width;
+        //        mark.h = this.height;
+        //        mark.active.imageData = mark.ctx.getImageData(0,0,mark.canvas.width,mark.canvas.height).data;
+        //    }
+        //}
         this.currentImg.onload = function() {
             mark.drawImage();
+            mark.w = this.width;
+            mark.h = this.height;
             mark.active.imageData = mark.ctx.getImageData(0,0,mark.canvas.width,mark.canvas.height).data;
         }
         this.currentImg.src = img.src;
